@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import com.sun.tools.javac.Main;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OpenWeatherMapResponse {
     @JsonProperty("name")
@@ -65,9 +66,10 @@ public class OpenWeatherMapResponse {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class WeatherInfo{
+    public static class WeatherInfo {
         @JsonProperty("description")
         private String description;
+
         public String getDescription() {
             return description;
         }
@@ -76,11 +78,10 @@ public class OpenWeatherMapResponse {
             this.description = description;
         }
 
-
-
     }
+
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class Wind{
+    public static class Wind {
         @JsonProperty("speed")
         private double speed;
 
@@ -93,6 +94,7 @@ public class OpenWeatherMapResponse {
         }
 
     }
+
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Sys {
         @JsonProperty("country")
@@ -106,7 +108,6 @@ public class OpenWeatherMapResponse {
             this.country = country;
         }
     }
-
 
     public String getCityName() {
         return cityName;
@@ -155,13 +156,5 @@ public class OpenWeatherMapResponse {
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
-
-
-
-
-
-
-
-
 
 }
