@@ -2,8 +2,11 @@ package com.example.weather.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import java.io.Serializable;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Weather {
+public class Weather implements Serializable {
+    private static final long serialVersionUID = 1L;
     private String city;
     private double temperature;
     private double feelsLike;
@@ -14,7 +17,8 @@ public class Weather {
     private String country;
     private long timestamp;
 
-    public Weather() {}
+    public Weather() {
+    }
 
     public String getCity() {
         return city;
@@ -88,5 +92,41 @@ public class Weather {
         this.timestamp = timestamp;
     }
 
-}
+    private double windDirection;
+    private double windGust;
+    private double rainVolume;
+    private double snowVolume;
 
+    public double getWindDirection() {
+        return windDirection;
+    }
+
+    public void setWindDirection(double windDirection) {
+        this.windDirection = windDirection;
+    }
+
+    public double getWindGust() {
+        return windGust;
+    }
+
+    public void setWindGust(double windGust) {
+        this.windGust = windGust;
+    }
+
+    public double getRainVolume() {
+        return rainVolume;
+    }
+
+    public void setRainVolume(double rainVolume) {
+        this.rainVolume = rainVolume;
+    }
+
+    public double getSnowVolume() {
+        return snowVolume;
+    }
+
+    public void setSnowVolume(double snowVolume) {
+        this.snowVolume = snowVolume;
+    }
+
+}

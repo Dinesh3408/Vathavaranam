@@ -6,8 +6,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import com.sun.tools.javac.Main;
 
+import java.io.Serializable;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class OpenWeatherMapResponse {
+public class OpenWeatherMapResponse implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     @JsonProperty("name")
     private String cityName;
     @JsonProperty("main")
@@ -21,8 +25,14 @@ public class OpenWeatherMapResponse {
     @JsonProperty("dt")
     private long timestamp;
 
+    @JsonProperty("rain")
+    private Rain rain;
+    @JsonProperty("snow")
+    private Snow snow;
+
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class Main {
+    public static class Main implements Serializable {
+        private static final long serialVersionUID = 1L;
         @JsonProperty("temp")
         private double temperature;
         @JsonProperty("feels_like")
@@ -66,7 +76,8 @@ public class OpenWeatherMapResponse {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class WeatherInfo {
+    public static class WeatherInfo implements Serializable {
+        private static final long serialVersionUID = 1L;
         @JsonProperty("description")
         private String description;
 
@@ -81,9 +92,14 @@ public class OpenWeatherMapResponse {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class Wind {
+    public static class Wind implements Serializable {
+        private static final long serialVersionUID = 1L;
         @JsonProperty("speed")
         private double speed;
+        @JsonProperty("deg")
+        private int deg;
+        @JsonProperty("gust")
+        private double gust;
 
         public double getSpeed() {
             return speed;
@@ -93,10 +109,56 @@ public class OpenWeatherMapResponse {
             this.speed = speed;
         }
 
+        public int getDeg() {
+            return deg;
+        }
+
+        public void setDeg(int deg) {
+            this.deg = deg;
+        }
+
+        public double getGust() {
+            return gust;
+        }
+
+        public void setGust(double gust) {
+            this.gust = gust;
+        }
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class Sys {
+    public static class Rain implements Serializable {
+        private static final long serialVersionUID = 1L;
+        @JsonProperty("1h")
+        private double oneHour;
+
+        public double getOneHour() {
+            return oneHour;
+        }
+
+        public void setOneHour(double oneHour) {
+            this.oneHour = oneHour;
+        }
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Snow implements Serializable {
+        private static final long serialVersionUID = 1L;
+        @JsonProperty("1h")
+        private double oneHour;
+
+        public double getOneHour() {
+            return oneHour;
+        }
+
+        public void setOneHour(double oneHour) {
+            this.oneHour = oneHour;
+        }
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Sys implements Serializable {
+        private static final long serialVersionUID = 1L;
         @JsonProperty("country")
         private String country;
 
@@ -139,6 +201,22 @@ public class OpenWeatherMapResponse {
 
     public void setWind(Wind wind) {
         this.wind = wind;
+    }
+
+    public Rain getRain() {
+        return rain;
+    }
+
+    public void setRain(Rain rain) {
+        this.rain = rain;
+    }
+
+    public Snow getSnow() {
+        return snow;
+    }
+
+    public void setSnow(Snow snow) {
+        this.snow = snow;
     }
 
     public Sys getSys() {
