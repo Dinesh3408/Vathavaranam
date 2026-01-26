@@ -31,7 +31,14 @@ public class RedisConfig implements CachingConfigurer {
 
     @Bean
     public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
-        log.info("Configuring Redis Cache with URL: {}", redisUrl.replaceAll(":.*@", ":****@")); // Mask password
+        log.info("--- Redis Connectivity Debug ---");
+        log.info("Redis URL from Properties: {}", redisUrl.replaceAll(":.*@", ":****@"));
+
+        if (connectionFactory instanceof org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory) {
+            var lcf = (org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory) connectionFactory;
+            log.info("Host: {}, Port: {}, SSL: {}", lcf.getHostName(), lcf.getPort(), lcf.isUseSsl());
+        }
+        log.info("--------------------------------");
 
         RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
                 .entryTtl(Duration.ofMinutes(30))
@@ -43,6 +50,21 @@ public class RedisConfig implements CachingConfigurer {
         return RedisCacheManager.builder(connectionFactory)
                 .cacheDefaults(config)
                 .build();
+    }
+
+    @Bean
+    public org.springframework.boot.ApplicationRunner connectionTest(RedisConnectionFactory factory) {
+        return args -> {
+            try {
+                log.info("Testing Redis connection...");
+                String response = factory.getConnection().ping();
+                log.info("Redis Ping Response: {}", response);
+                log.info("✅ Successfully connected to Redis!");
+            } catch (Exception e) {
+                log.error("❌ FAILED to connect to Redis: {}", e.getMessage());
+                log.error("Tip: Check if REDIS_URL environment variable is correctly set in Render Dashboard.");
+            }
+        };
     }
 
     @Override
