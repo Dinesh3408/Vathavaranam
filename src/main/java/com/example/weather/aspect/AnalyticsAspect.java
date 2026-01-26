@@ -53,16 +53,33 @@ public class AnalyticsAspect {
     }
 
     private String getClientIP(HttpServletRequest request) {
-        String ip = request.getHeader("X-Forwarded-For");
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("X-Real-IP");
+        String[] headers = {
+                "X-Forwarded-For",
+                "Proxy-Client-IP",
+                "WL-Proxy-Client-IP",
+                "HTTP_X_FORWARDED_FOR",
+                "HTTP_X_FORWARDED",
+                "HTTP_X_CLUSTER_CLIENT_IP",
+                "HTTP_CLIENT_IP",
+                "HTTP_FORWARDED_FOR",
+                "HTTP_FORWARDED",
+                "HTTP_VIA",
+                "REMOTE_ADDR",
+                "X-Real-IP"
+        };
+
+        for (String header : headers) {
+            String ip = request.getHeader(header);
+            if (ip != null && !ip.isEmpty() && !"unknown".equalsIgnoreCase(ip)) {
+                // In case of multiple IPs (e.g. from X-Forwarded-For), take the first one
+                String detectedIP = ip.split(",")[0].trim();
+                log.debug("AnalyticsAspect: Detected IP {} from header {}", detectedIP, header);
+                return detectedIP;
+            }
         }
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getRemoteAddr();
-        }
-        if (ip != null && ip.contains(",")) {
-            ip = ip.split(",")[0].trim();
-        }
-        return ip;
+
+        String remoteAddr = request.getRemoteAddr();
+        log.debug("AnalyticsAspect: No proxy headers found. Using getRemoteAddr: {}", remoteAddr);
+        return remoteAddr;
     }
 }
