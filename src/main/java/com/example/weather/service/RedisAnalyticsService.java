@@ -28,9 +28,11 @@ public class RedisAnalyticsService implements AnalyticsService {
 
     public long recordHit() {
         try {
-            return redisTemplate.opsForValue().increment(KEY_TOTAL_HITS);
+            long count = redisTemplate.opsForValue().increment(KEY_TOTAL_HITS);
+            log.info("RedisAnalyticsService: Recorded hit. New total hits: {}", count);
+            return count;
         } catch (Exception e) {
-            log.error("Failed to record hit in Redis: {}", e.getMessage());
+            log.error("RedisAnalyticsService: Failed to record hit in Redis: {}", e.getMessage());
             return 0;
         }
     }

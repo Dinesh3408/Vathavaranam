@@ -17,11 +17,13 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/analytics")
 public class AnalyticsController {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AnalyticsController.class);
     @Autowired
     private AnalyticsService analyticsService;
 
     @GetMapping("/stats")
     public ResponseEntity<Map<String, Object>> getStats() {
+        log.info("AnalyticsController: Received request for /stats");
         Map<String, Object> stats = new HashMap<>();
 
         stats.put("totalHits", analyticsService.getTotalHits());
