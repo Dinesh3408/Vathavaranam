@@ -1,8 +1,6 @@
 package com.example.weather.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "search_metrics")
