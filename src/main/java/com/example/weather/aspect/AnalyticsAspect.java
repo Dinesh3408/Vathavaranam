@@ -26,18 +26,26 @@ public class AnalyticsAspect {
 
     @AfterReturning("weatherControllerMethods()")
     public void recordGeneralAnalytics(JoinPoint joinPoint) {
-        // Record general hit and visitor for any weather controller method
-        analyticsService.recordHit();
+        try {
+            // Record general hit and visitor for any weather controller method
+            analyticsService.recordHit();
 
-        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
-                .getRequest();
-        String ip = getClientIP(request);
-        analyticsService.recordVisitor(ip);
+            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
+                    .getRequest();
+            String ip = getClientIP(request);
+            analyticsService.recordVisitor(ip);
+        } catch (Exception e) {
+            // Silently fail to not disrupt the original request flow
+        }
     }
 
     @AfterReturning(pointcut = "execution(* com.example.weather.controller.WeatherController.getWeatherByCity(..)) && args(city, ..)", argNames = "city")
     public void recordCitySearch(String city) {
-        analyticsService.recordCitySearch(city);
+        try {
+            analyticsService.recordCitySearch(city);
+        } catch (Exception e) {
+            // Silently fail
+        }
     }
 
     private String getClientIP(HttpServletRequest request) {

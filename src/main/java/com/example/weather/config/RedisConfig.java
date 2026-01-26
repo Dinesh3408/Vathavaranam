@@ -44,8 +44,24 @@ public class RedisConfig implements CachingConfigurer {
             public void handleCacheGetError(RuntimeException exception, Cache cache, Object key) {
                 log.warn("Cache 'get' failed for key '{}' in cache '{}'. Treating as a miss. Error: {}",
                         key, cache.getName(), exception.getMessage());
-                // Treating as a miss prevents ClassCastException during app restarts with
-                // DevTools
+            }
+
+            @Override
+            public void handleCachePutError(RuntimeException exception, Cache cache, Object key, Object value) {
+                log.error("Cache 'put' failed for key '{}' in cache '{}'. Error: {}",
+                        key, cache.getName(), exception.getMessage());
+            }
+
+            @Override
+            public void handleCacheEvictError(RuntimeException exception, Cache cache, Object key) {
+                log.error("Cache 'evict' failed for key '{}' in cache '{}'. Error: {}",
+                        key, cache.getName(), exception.getMessage());
+            }
+
+            @Override
+            public void handleCacheClearError(RuntimeException exception, Cache cache) {
+                log.error("Cache 'clear' failed for cache '{}'. Error: {}",
+                        cache.getName(), exception.getMessage());
             }
         };
     }
