@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: weather-backend
+    env: docker
+    plan: free
+    region: ohio
+    dockerContext: .
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: REDIS_URL
+        fromService:
+          name: cache-redis
+          type: redis
+          property: connectionString
+      - key: OPENWEATHER_API_KEY
+        sync: false # Set this in the Render dashboard manually for security
+
+  - type: redis
+    name: cache-redis
+    plan: free
+    region: ohio
+    ipAllowList: [] # Allow internal traffic only

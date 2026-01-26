@@ -12,12 +12,14 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/analytics")
 public class AnalyticsController {
     @Autowired
     private AnalyticsService analyticsService;
+
     @GetMapping("/stats")
     public ResponseEntity<Map<String, Object>> getStats() {
         Map<String, Object> stats = new HashMap<>();
@@ -25,13 +27,14 @@ public class AnalyticsController {
         stats.put("totalHits", analyticsService.getTotalHits());
         stats.put("uniqueVisitors", analyticsService.getUniqueVisitors());
         stats.put("topCities", analyticsService.getTopCities());
-        stats.put("upTime",calculateUptime());
+        stats.put("uptime", calculateUptime());
         return ResponseEntity.ok(stats);
     }
+
     private String calculateUptime() {
         Duration uptime = Duration.between(analyticsService.getStartTime(), LocalDateTime.now());
-        long hours =  uptime.toHours();
-        long minutes =  uptime.toMinutes()%60;
+        long hours = uptime.toHours();
+        long minutes = uptime.toMinutes() % 60;
         return String.format("%02d:%02d", hours, minutes);
     }
 }

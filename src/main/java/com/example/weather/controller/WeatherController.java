@@ -2,7 +2,6 @@ package com.example.weather.controller;
 
 import com.example.weather.dto.ForecastResponse;
 import com.example.weather.model.Weather;
-import com.example.weather.service.AnalyticsService;
 import com.example.weather.service.WeatherService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,15 +14,10 @@ import org.springframework.web.bind.annotation.*;
 public class WeatherController {
     @Autowired
     private WeatherService weatherService;
-    @Autowired
-    private AnalyticsService analyticsService;
 
     @GetMapping("/{city}")
     public ResponseEntity<?> getWeatherByCity(@PathVariable String city, HttpServletRequest request) {
         try {
-            analyticsService.recordHit();
-            analyticsService.recordCitySearch(city);
-            analyticsService.recordVisitor(getClientIP(request));
             Weather weather = weatherService.getWeatherByCity(city);
             return ResponseEntity.ok(weather);
         } catch (Exception e) {
@@ -36,8 +30,6 @@ public class WeatherController {
     public ResponseEntity<Weather> getWeatherByCoordinates(@RequestParam double lat, @RequestParam double lon,
             HttpServletRequest request) {
         try {
-            analyticsService.recordHit();
-            analyticsService.recordVisitor(getClientIP(request));
             Weather weather = weatherService.getWeatherByCoordinates(lat, lon);
             return ResponseEntity.ok(weather);
         } catch (Exception e) {
@@ -48,7 +40,6 @@ public class WeatherController {
     @GetMapping("/forecast/{city}")
     public ResponseEntity<ForecastResponse> getForecastByCity(@PathVariable String city) {
         try {
-            analyticsService.recordHit();
             ForecastResponse forecast = weatherService.getForecastByCity(city);
             return ResponseEntity.ok(forecast);
         } catch (Exception e) {
@@ -59,10 +50,7 @@ public class WeatherController {
     @GetMapping("/auto")
     public ResponseEntity<?> getWeatherByAutoIp(HttpServletRequest request) {
         try {
-            analyticsService.recordHit();
             String ip = getClientIP(request);
-            analyticsService.recordVisitor(ip);
-
             Weather weather = weatherService.getWeatherByIp(ip);
             if (weather == null) {
                 return ResponseEntity.status(404).body("Could not determine location or weather from IP: " + ip);

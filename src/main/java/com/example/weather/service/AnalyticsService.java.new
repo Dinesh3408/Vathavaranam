@@ -5,16 +5,10 @@ import java.util.Map;
 
 public interface AnalyticsService {
     long recordHit();
-
     void recordVisitor(String ipAddress);
-
     void recordCitySearch(String city);
-
     long getTotalHits();
-
     long getUniqueVisitors();
-
     Map<String, Long> getTopCities();
-
     LocalDateTime getStartTime();
 }

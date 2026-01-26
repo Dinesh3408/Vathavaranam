@@ -28,4 +28,4 @@ EXPOSE 8080
 ENV PORT=8080
 
 # Run the application
-CMD ["java", "-Dserver.port=${PORT}", "-jar", "app.jar"]
+CMD java -Dserver.port=${PORT} -jar app.jar
