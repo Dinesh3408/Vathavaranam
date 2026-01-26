@@ -1,5 +1,6 @@
 package com.example.weather.controller;
 
+import com.example.weather.dto.ForecastResponse;
 import com.example.weather.model.Weather;
 import com.example.weather.service.AnalyticsService;
 import com.example.weather.service.WeatherService;
@@ -18,7 +19,7 @@ public class WeatherController {
     private AnalyticsService analyticsService;
 
     @GetMapping("/{city}")
-    public ResponseEntity<Weather> getWeatherByCity(@PathVariable String city, HttpServletRequest request) {
+    public ResponseEntity<?> getWeatherByCity(@PathVariable String city, HttpServletRequest request) {
         try {
             analyticsService.recordHit();
             analyticsService.recordCitySearch(city);
@@ -26,7 +27,8 @@ public class WeatherController {
             Weather weather = weatherService.getWeatherByCity(city);
             return ResponseEntity.ok(weather);
         } catch (Exception e) {
-            return ResponseEntity.status(500).build();
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Error: " + e.getMessage());
         }
     }
 
@@ -40,6 +42,35 @@ public class WeatherController {
             return ResponseEntity.ok(weather);
         } catch (Exception e) {
             return ResponseEntity.status(500).build();
+        }
+    }
+
+    @GetMapping("/forecast/{city}")
+    public ResponseEntity<ForecastResponse> getForecastByCity(@PathVariable String city) {
+        try {
+            analyticsService.recordHit();
+            ForecastResponse forecast = weatherService.getForecastByCity(city);
+            return ResponseEntity.ok(forecast);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
+        }
+    }
+
+    @GetMapping("/auto")
+    public ResponseEntity<?> getWeatherByAutoIp(HttpServletRequest request) {
+        try {
+            analyticsService.recordHit();
+            String ip = getClientIP(request);
+            analyticsService.recordVisitor(ip);
+
+            Weather weather = weatherService.getWeatherByIp(ip);
+            if (weather == null) {
+                return ResponseEntity.status(404).body("Could not determine location or weather from IP: " + ip);
+            }
+            return ResponseEntity.ok(weather);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Error: " + e.getMessage());
         }
     }
 
