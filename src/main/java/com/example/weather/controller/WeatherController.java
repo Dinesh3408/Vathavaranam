@@ -2,8 +2,10 @@ package com.example.weather.controller;
 
 import com.example.weather.dto.ForecastResponse;
 import com.example.weather.model.Weather;
+import com.example.weather.service.AnalyticsService;
 import com.example.weather.service.WeatherService;
 import jakarta.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,10 +17,18 @@ public class WeatherController {
     @Autowired
     private WeatherService weatherService;
 
+    @Autowired
+    private AnalyticsService analyticsService;
+
+
     @GetMapping("/{city}")
     public ResponseEntity<?> getWeatherByCity(@PathVariable String city, HttpServletRequest request) {
         try {
+            analyticsService.recordHit();
+            analyticsService.recordVisitor(getClientIP(request));
+            analyticsService.recordCitySearch(city);
             Weather weather = weatherService.getWeatherByCity(city);
+
             return ResponseEntity.ok(weather);
         } catch (Exception e) {
             e.printStackTrace();
@@ -30,7 +40,10 @@ public class WeatherController {
     public ResponseEntity<Weather> getWeatherByCoordinates(@RequestParam double lat, @RequestParam double lon,
             HttpServletRequest request) {
         try {
+            analyticsService.recordHit();
+            analyticsService.recordVisitor(getClientIP(request));
             Weather weather = weatherService.getWeatherByCoordinates(lat, lon);
+
             return ResponseEntity.ok(weather);
         } catch (Exception e) {
             return ResponseEntity.status(500).build();
@@ -51,7 +64,10 @@ public class WeatherController {
     public ResponseEntity<?> getWeatherByAutoIp(HttpServletRequest request) {
         try {
             String ip = getClientIP(request);
+            analyticsService.recordHit();
+            analyticsService.recordVisitor(ip);
             Weather weather = weatherService.getWeatherByIp(ip);
+
             if (weather == null) {
                 return ResponseEntity.status(404).body("Could not determine location or weather from IP: " + ip);
             }

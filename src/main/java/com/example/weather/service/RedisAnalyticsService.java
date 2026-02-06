@@ -15,6 +15,7 @@ public class RedisAnalyticsService implements AnalyticsService {
     private final StringRedisTemplate redisTemplate;
     private final com.example.weather.repository.SearchMetricRepository searchMetricRepository;
     private final com.example.weather.repository.VisitorIPRepository visitorIPRepository;
+    private final com.example.weather.repository.GeneralMetricRepository generalMetricRepository;
     private static final Logger log = LoggerFactory.getLogger(RedisAnalyticsService.class);
 
     // Keys for Redis
@@ -24,23 +25,38 @@ public class RedisAnalyticsService implements AnalyticsService {
 
     public RedisAnalyticsService(StringRedisTemplate redisTemplate,
             com.example.weather.repository.SearchMetricRepository searchMetricRepository,
-            com.example.weather.repository.VisitorIPRepository visitorIPRepository) {
+            com.example.weather.repository.VisitorIPRepository visitorIPRepository,
+            com.example.weather.repository.GeneralMetricRepository generalMetricRepository) {
         this.redisTemplate = redisTemplate;
         this.searchMetricRepository = searchMetricRepository;
         this.visitorIPRepository = visitorIPRepository;
+        this.generalMetricRepository = generalMetricRepository;
     }
 
     private final LocalDateTime startTime = LocalDateTime.now();
 
     public long recordHit() {
+        long count = 0;
         try {
-            long count = redisTemplate.opsForValue().increment(KEY_TOTAL_HITS);
-            log.info("RedisAnalyticsService: Recorded hit. New total hits: {}", count);
-            return count;
+            count = redisTemplate.opsForValue().increment(KEY_TOTAL_HITS);
+            log.info("RedisAnalyticsService: Recorded hit in Redis. New count: {}", count);
         } catch (Exception e) {
-            log.error("RedisAnalyticsService: Failed to record hit in Redis: {}", e.getMessage());
-            return 0;
+            log.warn("RedisAnalyticsService: Failed to record hit in Redis: {}", e.getMessage());
         }
+
+        // Always sync to SQL for permanence
+        try {
+            com.example.weather.model.GeneralMetric metric = generalMetricRepository.findByMetricKey(KEY_TOTAL_HITS)
+                    .orElse(new com.example.weather.model.GeneralMetric(KEY_TOTAL_HITS, 0));
+            metric.setMetricValue(metric.getMetricValue() + 1);
+            generalMetricRepository.save(metric);
+            if (count == 0)
+                count = metric.getMetricValue();
+            log.info("RedisAnalyticsService: Permanent record updated for total hits: {}", metric.getMetricValue());
+        } catch (Exception e) {
+            log.error("RedisAnalyticsService: Failed to record hit in SQL: {}", e.getMessage());
+        }
+        return count;
     }
 
     public void recordVisitor(String ipAddress) {
@@ -78,11 +94,16 @@ public class RedisAnalyticsService implements AnalyticsService {
     public long getTotalHits() {
         try {
             String hits = redisTemplate.opsForValue().get(KEY_TOTAL_HITS);
-            return hits != null ? Long.parseLong(hits) : 0;
+            if (hits != null)
+                return Long.parseLong(hits);
         } catch (Exception e) {
-            log.error("RedisAnalyticsService: Failed to get total hits from Redis: {}", e.getMessage());
-            return 0;
+            log.warn("RedisAnalyticsService: Failed to get total hits from Redis: {}", e.getMessage());
         }
+
+        // Fallback to SQL
+        return generalMetricRepository.findByMetricKey(KEY_TOTAL_HITS)
+                .map(com.example.weather.model.GeneralMetric::getMetricValue)
+                .orElse(0L);
     }
 
     public long getUniqueVisitors() {

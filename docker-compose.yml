@@ -1,22 +1,49 @@
-version: '3.8'
-
 services:
-  app:
+  backend:
     build: .
+    container_name: weather-backend
     ports:
       - "8080:8080"
     environment:
+      - PORT=8080
       - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=jdbc:postgresql://db:5432/weatherdb
+      - DB_DRIVER=org.postgresql.Driver
+      - DB_USER=weatheruser
+      - DB_PASSWORD=weatherpass
+      - DB_DIALECT=org.hibernate.dialect.PostgreSQLDialect
       - OPENWEATHER_API_KEY=${OPENWEATHER_API_KEY}
     depends_on:
       - redis
+      - db
+    networks:
+      - weather-network
+    volumes:
+      - ./logs:/app/logs
 
   redis:
     image: redis:alpine
-    ports:
-      - "6379:6379"
+    container_name: weather-redis
+    networks:
+      - weather-network
+    restart: always
+
+  db:
+    image: postgres:15-alpine
+    container_name: weather-db
+    environment:
+      - POSTGRES_DB=weatherdb
+      - POSTGRES_USER=weatheruser
+      - POSTGRES_PASSWORD=weatherpass
     volumes:
-      - redis_data:/data
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - weather-network
+    restart: always
+
+networks:
+  weather-network:
+    driver: bridge
 
 volumes:
-  redis_data:
+  postgres_data:
